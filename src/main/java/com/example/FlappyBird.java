@@ -12,13 +12,13 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     int boardWidth = 360;
     int boardHeight = 640;
 
-    // Images
+
     Image backgroundImg;
     Image birdImg;
     Image topPipeImg;
     Image bottomPipeImg;
 
-    // Bird
+
     int birdX = boardWidth / 8;
     int birdY = boardHeight / 2;
     int birdWidth = 34;
@@ -36,7 +36,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    // Pipes
+
     int pipeX = boardWidth;
     int pipeY = 0;
     int pipeWidth = 64;
@@ -55,7 +55,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    // Game logic
+
     Bird bird;
     int velocityX = -4;
     int velocityY = 0;
@@ -71,34 +71,41 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
     Clip passClip;
     Clip gameOverClip;
+    Clip backgroundClip;
 
     FlappyBird() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
         setFocusable(true);
         addKeyListener(this);
 
-        // Load Images
+
         backgroundImg = new ImageIcon(getClass().getClassLoader().getResource("flappybirdbg.png")).getImage();
         birdImg = new ImageIcon(getClass().getClassLoader().getResource("flappybird.png")).getImage();
         topPipeImg = new ImageIcon(getClass().getClassLoader().getResource("toppipe.png")).getImage();
         bottomPipeImg = new ImageIcon(getClass().getClassLoader().getResource("bottompipe.png")).getImage();
 
-        // Load Sounds
+
         try {
             passClip = AudioSystem.getClip();
             passClip.open(AudioSystem.getAudioInputStream(getClass().getClassLoader().getResource("pass.wav")));
 
             gameOverClip = AudioSystem.getClip();
             gameOverClip.open(AudioSystem.getAudioInputStream(getClass().getClassLoader().getResource("gameover.wav")));
+
+
+            backgroundClip = AudioSystem.getClip();
+            backgroundClip.open(AudioSystem.getAudioInputStream(getClass().getClassLoader().getResource("background.wav")));
+            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY);
+            backgroundClip.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Initialize Bird and Pipes
+
         bird = new Bird(birdImg);
         pipes = new ArrayList<>();
 
-        // Place pipes timer
+
         placePipesTimer = new Timer(1500, e -> placePipes());
         placePipesTimer.start();
 
@@ -171,11 +178,11 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         }
 
 
-        if (score > 0 && score % 15 == 0) {
-            if (velocityX > -6) {
+        if (score > 0 && score % 20 == 0) {
+            if (velocityX > -8) {
                 velocityX -= 0.8;
             }
-            if (placePipesTimer.getDelay() > 1000) {
+            if (placePipesTimer.getDelay() > 1200) {
                 placePipesTimer.setDelay(placePipesTimer.getDelay() - 50);
             }
         }
@@ -196,6 +203,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         } else {
             placePipesTimer.stop();
             gameLoop.stop();
+            backgroundClip.stop();
         }
     }
 
@@ -217,6 +225,11 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         gameOver = false;
         velocityX = -4;
         placePipesTimer.setDelay(1500);
+
+        backgroundClip.setFramePosition(0);
+        backgroundClip.loop(Clip.LOOP_CONTINUOUSLY);
+        backgroundClip.start();
+
         gameLoop.start();
         placePipesTimer.start();
     }
